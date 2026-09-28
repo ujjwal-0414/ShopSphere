@@ -1,16 +1,140 @@
-ShopSphere — Full-Stack E-Commerce Application
+# ShopSphere — Full-Stack E-Commerce Application
 
-ShopSphere is a full-stack e-commerce project with a Spring Boot REST API + PostgreSQL backend and a React + Vite frontend.
+ShopSphere is a full-stack e-commerce application built around a **Spring Boot REST API + PostgreSQL backend** and a **React + Vite storefront**.
 
-The project is intentionally positioned as an intermediate backend-focused portfolio project. It goes beyond basic CRUD by implementing JWT authentication, role-based access control, DTO validation, centralized exception handling, transactional business operations, pessimistic locking for inventory concurrency, JPA @EntityGraph fetch planning, order lifecycle management, inventory restoration and a simulated payment workflow.
+The project is positioned as an intermediate backend-focused portfolio project. Instead of stopping at CRUD, it demonstrates **JWT authentication, role-based access control, DTO validation, centralized exception handling, transactional business operations, pessimistic inventory locking, JPA fetch planning, order lifecycle management, inventory restoration, and a simulated payment workflow**.
 
-Repository Structure
+---
 
+## Core Features & Architecture
+
+- **Stateless Authentication:** JWT-based login with Spring Security and Bearer-token authentication.
+- **Role-Based Access Control:** Separate `USER` and `ADMIN` permissions for customer and management operations.
+- **Secure Password Storage:** BCrypt password hashing before persistence.
+- **DTO-Based API Design:** Request/response DTOs and mapper classes keep API contracts separate from JPA entities.
+- **Transactional Business Logic:** Order, inventory, cancellation, cart, address and payment workflows use transactional service operations.
+- **Inventory Concurrency Control:** Pessimistic database locking protects stock updates during concurrent order creation.
+- **JPA Fetch Optimization:** Lazy relationships are combined with targeted `@EntityGraph` queries.
+- **Order Lifecycle:** Orders move through controlled states such as `PENDING`, `CONFIRMED`, `SHIPPED`, `DELIVERED` and `CANCELLED`.
+- **Inventory Restoration:** Eligible order cancellation restores reserved product stock.
+- **Simulated Payments:** Internal payment records and transaction IDs demonstrate payment/order state transitions without processing real money.
+- **React Storefront:** Responsive product browsing, search/filtering, cart, addresses, checkout and order history.
+- **Centralized Error Handling:** Backend and frontend provide consistent handling for validation, API failures and authentication errors.
+
+---
+
+## System Architecture
+
+```text
+                    React + Vite Frontend
+                             │
+                       Axios + JWT
+                             │
+                             ▼
+                 Spring Security Filter Chain
+                  ├── JWT Authentication
+                  ├── RBAC
+                  ├── CORS
+                  └── 401 / 403 Handling
+                             │
+                             ▼
+                       REST Controllers
+                             │
+                             ▼
+                        Service Layer
+                  Business Rules + Transactions
+                             │
+                             ▼
+                      Repository Layer
+               JPA + EntityGraph + DB Locking
+                             │
+                             ▼
+                      PostgreSQL Database
+```
+
+---
+
+## Technical Stack
+
+| Area | Technology |
+|---|---|
+| Backend | Spring Boot 4.1.0 |
+| Language | Java 21 |
+| Security | Spring Security + JWT |
+| JWT Library | JJWT 0.12.6 |
+| Password Hashing | BCrypt |
+| ORM | Spring Data JPA / Hibernate |
+| Database | PostgreSQL |
+| Validation | Jakarta Bean Validation |
+| Boilerplate Reduction | Lombok |
+| Frontend | React 19 |
+| Frontend Build | Vite 7 |
+| Routing | React Router 7 |
+| HTTP Client | Axios 1.x |
+| Styling | CSS |
+| Backend Build | Maven |
+
+---
+
+## Application Modules
+
+### Authentication & Users
+
+Registration and login are handled by the Spring Security/JWT authentication flow. Protected operations require a valid Bearer token.
+
+### Product & Category Management
+
+Customers can browse, search and filter products. Product and category mutations are restricted to administrators.
+
+### Cart
+
+Each authenticated user has an isolated cart. Cart items reference products and quantities can be updated without exposing another user's cart.
+
+### Addresses
+
+Users can create, update, delete and select addresses. Shipping information is copied into an order when it is created so historical orders are independent of later address changes.
+
+### Orders
+
+Order creation runs transactionally, validates stock, locks inventory rows, creates order items and stores purchase-time information.
+
+### Payments
+
+The current payment module is intentionally simulated. A successful payment creates an internal payment record and transaction ID and confirms the pending order.
+
+---
+
+## Application Screenshots
+
+### Storefront
+
+![ShopSphere Home](docs/screenshots/home.png)
+
+### Product Catalogue
+
+![ShopSphere Product Catalogue](docs/screenshots/product-catalog.png)
+
+### Shopping Cart
+
+![ShopSphere Shopping Cart](docs/screenshots/cart.png)
+
+### Authentication
+
+![ShopSphere Login](docs/screenshots/login.png)
+
+![ShopSphere Registration](docs/screenshots/register.png)
+
+---
+
+## Repository Structure
+
+```text
 ShopSphere/
 ├── ecommerce_Backend/
 │   ├── src/main/java/...
-│   ├── src/main/resources/application.properties
-│   ├── src/main/resources/data.sql
+│   ├── src/main/resources/
+│   │   ├── application.properties
+│   │   └── data.sql
 │   └── README.md
 │
 ├── ecommerce_Frontend/
@@ -18,115 +142,150 @@ ShopSphere/
 │   ├── public/
 │   └── README.md
 │
+├── docs/
+│   └── screenshots/
+│
 └── README.md
+```
 
-Run Locally
+---
 
-Backend
+## Local Setup & Installation
 
-Requirements:
+### 1. Prerequisites
 
-Java 21
+Install:
 
-PostgreSQL
+- Java 21
+- PostgreSQL
+- Node.js
+- npm
+- Maven Wrapper included with the backend
 
-Maven Wrapper
+### 2. Create the Database
 
-Create a PostgreSQL database named ecommerce and configure the environment variables documented in ecommerce_Backend/README.md.
+Create a PostgreSQL database named:
 
-Windows:
+```text
+ecommerce
+```
 
-cd ecommerce_Backend
-.\mvnw.cmd spring-boot:run
+### 3. Configure Backend Environment Variables
 
-macOS/Linux:
+The backend reads sensitive values from the environment:
 
-cd ecommerce_Backend
-./mvnw spring-boot:run
-
-Backend:
-
-http://localhost:8080
-
-Frontend
-
-Requirements:
-
-Node.js
-
-npm
-
-cd ecommerce_Frontend
-npm install
-npm run dev
-
-Frontend:
-
-http://localhost:5173
-
-Security / Configuration
-
-No real database password or JWT signing key belongs in Git. The backend reads sensitive values from environment variables:
-
+```text
 DB_USERNAME
 DB_PASSWORD
 JWT_SECRET_KEY
 JWT_EXPIRATION
+```
 
-The repository includes .env.example files containing placeholders only. Never commit a real .env file or real secret values.
+Do not commit real database passwords or JWT signing keys.
 
-Documentation
+### 4. Start the Backend
 
-Backend documentation
+**Windows:**
 
-Frontend documentation
+```powershell
+cd ecommerce_Backend
+.\mvnw.cmd spring-boot:run
+```
 
-Payment Disclaimer
+**macOS / Linux:**
 
-The payment module is simulated. It creates an internal payment record and transaction ID and confirms the order; it does not connect to Razorpay, Stripe, PayPal or any other real payment processor.
+```bash
+cd ecommerce_Backend
+./mvnw spring-boot:run
+```
 
-Project Scope
+Backend:
 
-Implemented:
+```text
+http://localhost:8080
+```
 
-JWT authentication
+### 5. Start the Frontend
 
-BCrypt password hashing
+```bash
+cd ecommerce_Frontend
+npm install
+npm run dev
+```
 
-USER / ADMIN RBAC
+Frontend:
 
-Product/category management
+```text
+http://localhost:5173
+```
 
-Search and filtering
+---
 
-Cart management
+## Security & Configuration
 
-Address management
+Sensitive configuration is intentionally externalized from source control.
 
-Transactional order creation
+The backend uses environment variables for database credentials and JWT configuration. The frontend uses `VITE_API_BASE_URL` only for the public API base URL.
 
-Pessimistic inventory locking
+The frontend stores the access token in browser `localStorage` for this learning/portfolio project. Backend authorization remains the source of truth; hiding UI controls in React is not treated as authorization.
 
-Order cancellation and stock restoration
+---
 
-Admin order management
+## Payment Disclaimer
 
-DTOs and mappers
+ShopSphere does **not** integrate Razorpay, Stripe, PayPal or another real payment processor.
 
-Bean Validation
+The payment module is a controlled simulation that creates an internal payment record and transaction ID and moves a pending order to `CONFIRMED`. No real money or card/UPI credentials are processed.
 
-Global exception handling
+---
 
-Custom 401 / 403 responses
+## Current Scope vs Production Enhancements
 
-JPA @EntityGraph fetch optimization
+### Implemented
 
-Lazy relationship strategy
+- JWT authentication
+- BCrypt password hashing
+- USER / ADMIN RBAC
+- DTOs and mappers
+- Bean Validation
+- Global exception handling
+- Custom 401 / 403 responses
+- Transactions
+- Pessimistic inventory locking
+- JPA `@EntityGraph` fetch optimization
+- Lazy relationship strategy
+- Product/category management
+- Search and filtering
+- Cart and address management
+- Order lifecycle management
+- Inventory restoration on eligible cancellation
+- Admin order management
+- Simulated payments
+- React storefront and checkout flow
 
-CORS
+### Future Production Enhancements
 
-React storefront and checkout flow
+- Flyway/Liquibase database migrations
+- More comprehensive automated testing and CI
+- Testcontainers PostgreSQL integration tests
+- Refresh-token/session strategy
+- Rate limiting and brute-force protection
+- Audit logging and observability
+- Production secret management
+- HTTPS and production CORS configuration
+- Real payment gateway integration with webhook verification
+- Idempotency for payment/order operations
+- Production deployment and containerization
 
-Simulated payments
+---
 
-The documentation also lists production-oriented improvements that are intentionally outside the current scope, such as Flyway/Liquibase migrations, comprehensive automated tests, rate limiting, observability, refresh-token/session strategy and real payment-gateway integration.
+## Documentation
+
+- [Backend Documentation](ecommerce_Backend/README.md)
+- [Frontend Documentation](ecommerce_Frontend/README.md)
+
+---
+
+## Portfolio Description
+
+**ShopSphere — Full-Stack E-Commerce Application:** Built a Spring Boot and React e-commerce platform with JWT authentication, RBAC, DTO validation, transactional order processing, pessimistic inventory locking, JPA `EntityGraph` fetch optimization, cart/address/order management, admin order workflows and a simulated payment system backed by PostgreSQL.

@@ -1,123 +1,77 @@
-ShopSphere — React E-Commerce Frontend
+# ShopSphere — React E-Commerce Frontend
 
-ShopSphere is a React + Vite storefront built for the companion Spring Boot e-commerce REST API in ecommerce_Backend/.
+ShopSphere is a **React 19 + Vite storefront** built for the companion Spring Boot e-commerce REST API in `ecommerce_Backend/`.
 
-The frontend demonstrates a practical client-side architecture for an authenticated e-commerce application: API integration with Axios, JWT propagation, protected routes, product browsing, search/filtering, cart management, address selection, checkout, order history, payment simulation and reusable product-image handling.
+The frontend demonstrates a practical client-side architecture for an authenticated e-commerce application with **Axios API integration, JWT propagation, protected routes, product browsing, search/filtering, cart management, address selection, checkout, order history, simulated payments and reusable product-image handling**.
 
-Backend: http://localhost:8080
-Frontend: http://localhost:5173
+Backend: `http://localhost:8080`  
+Frontend: `http://localhost:5173`
 
-1. Frontend Highlights
+---
 
-React 19
+## Core Features & Architecture
 
-Vite development/build tooling
+- **React 19 Storefront:** Component-based responsive shopping interface.
+- **React Router:** Public and authenticated route separation.
+- **Axios Interceptors:** Central API client with automatic JWT propagation and authentication-error handling.
+- **Protected Routes:** Authenticated pages are guarded through `ProtectedRoute`.
+- **Authentication:** Registration, login, logout and persisted client-side authentication state.
+- **Product Catalogue:** Browse, search and filter products by category and price.
+- **Cart Management:** Add products, update quantities, remove items and clear the cart.
+- **Address Management:** Create/select delivery addresses during checkout.
+- **Orders:** Order history and order-detail views.
+- **Simulated Payments:** Checkout UI connected to the backend's internal payment simulation.
+- **Reusable UI States:** Loading, empty, API-error and unexpected-render-error states.
+- **Product Image Resolver:** Product-specific image mapping with backend-image and placeholder fallbacks.
 
-React Router for client-side routing
+---
 
-Axios API client with request/response interceptors
+## Technical Stack
 
-JWT Bearer token propagation
+| Area | Technology |
+|---|---|
+| UI | React 19 |
+| Build Tool | Vite 7 |
+| Routing | React Router 7 |
+| HTTP Client | Axios 1.x |
+| Language | JavaScript / JSX |
+| Styling | CSS |
+| Backend | Spring Boot REST API |
+| Authentication | JWT Bearer Token |
+| Database | PostgreSQL through backend |
 
-Protected routes for authenticated pages
+---
 
-Login and registration flows
+## Application Architecture
 
-Product catalogue and product details
+```text
+                         React Application
+                                │
+              ┌─────────────────┴─────────────────┐
+              │                                   │
+        React Router                        Context State
+              │                         ┌─────────┴─────────┐
+              │                         │                   │
+         Pages / Routes            AuthContext        CartContext
+              │                         │                   │
+              └─────────────────┬───────┴───────────────────┘
+                                │
+                         Axios API Client
+                                │
+                    Authorization: Bearer JWT
+                                │
+                                ▼
+                       Spring Boot Backend
+                                │
+                                ▼
+                         PostgreSQL Database
+```
 
-Category filtering
+---
 
-Product search
+## Project Structure
 
-Price filtering
-
-Cart management
-
-Address management
-
-Checkout workflow
-
-Order history and order details
-
-Simulated payment flow
-
-Loading and empty states
-
-Central error handling for expired/invalid authentication
-
-React error boundary to prevent an unexpected component error from producing a blank screen
-
-Product-specific image mapping with fallback handling
-
-Responsive storefront layout
-
-2. Technology Stack
-
-Area
-
-Technology
-
-UI
-
-React 19
-
-Build tool
-
-Vite 7
-
-Routing
-
-React Router 7
-
-HTTP client
-
-Axios 1.x
-
-Language
-
-JavaScript / JSX
-
-Styling
-
-CSS
-
-Backend
-
-Spring Boot REST API
-
-Authentication
-
-JWT Bearer token
-
-Database
-
-PostgreSQL through backend
-
-3. Application Architecture
-
-                    React Application
-                           │
-             ┌─────────────┴─────────────┐
-             │                           │
-         React Router               Context State
-             │                    ┌────────┴────────┐
-             │                    │                 │
-       Pages / Routes          AuthContext      CartContext
-             │                    │                 │
-             └─────────────┬──────┴─────────────────┘
-                           │
-                     Axios API Client
-                           │
-                 Authorization: Bearer JWT
-                           │
-                           ▼
-                  Spring Boot Backend
-                           │
-                           ▼
-                      PostgreSQL
-
-4. Project Structure
-
+```text
 ecommerce_Frontend/
 ├── public/
 │   └── placeholders/
@@ -161,305 +115,333 @@ ecommerce_Frontend/
 ├── package.json
 ├── package-lock.json
 └── vite.config.js
+```
 
-5. Routing
+---
 
-Public routes
+## Route Matrix
 
-/
-/products
-/products/:id
-/login
-/register
+### Public Routes
 
-Protected routes
+| Route | Purpose |
+|---|---|
+| `/` | Storefront home |
+| `/products` | Product catalogue |
+| `/products/:id` | Product details |
+| `/login` | User login |
+| `/register` | Account registration |
 
-/cart
-/checkout
-/orders
-/orders/:id
-/profile
+### Protected Routes
 
-ProtectedRoute prevents unauthenticated users from accessing protected pages and redirects them to login.
+| Route | Purpose |
+|---|---|
+| `/cart` | Shopping cart |
+| `/checkout` | Address and payment checkout |
+| `/orders` | Order history |
+| `/orders/:id` | Order details |
+| `/profile` | User profile |
 
-6. Axios and JWT Authentication
+`ProtectedRoute` redirects unauthenticated users to the login page.
 
-The central Axios client is located at:
+---
 
+## Axios & JWT Authentication
+
+The central Axios client is:
+
+```text
 src/api/axios.js
+```
 
 It uses:
 
+```text
 VITE_API_BASE_URL
+```
 
 with a development fallback of:
 
+```text
 http://localhost:8080
+```
 
-Before an API request, the Axios request interceptor reads the JWT from:
+### Request Interceptor
 
+The request interceptor reads the JWT from:
+
+```text
 localStorage → ecommerce_token
+```
 
 and sends:
 
+```http
 Authorization: Bearer <token>
+```
 
-Authentication lifecycle
+### Authentication Lifecycle
 
+```text
 Login
-↓
+  ↓
 Backend validates credentials
-↓
+  ↓
 Backend returns JWT
-↓
+  ↓
 Frontend stores JWT
-↓
+  ↓
 Axios automatically attaches JWT
-↓
+  ↓
 Protected API request
+```
 
-The response interceptor handles 401 Unauthorized by clearing the stored authentication state and redirecting the user to /login.
+### Response Interceptor
 
-For a production application, token storage can be redesigned around secure HTTP-only cookies/session mechanisms depending on the deployment and threat model. The current localStorage approach is intentionally simple for this learning/portfolio project.
+A `401 Unauthorized` response clears the stored authentication state and redirects the user to `/login`.
 
-7. React Context
+The current `localStorage` approach is intentionally simple for this learning/portfolio project. A production deployment can evaluate HTTP-only secure cookies/session mechanisms according to its threat model.
 
-AuthContext
+---
 
-Responsible for client-side authentication state such as:
+## React Context
 
-logged-in user
+### `AuthContext`
 
-login
+Provides shared authentication state such as:
 
-logout
+- Logged-in user
+- Login
+- Logout
+- Persisted authentication state
 
-persisted authentication state
+### `CartContext`
 
-CartContext
+Provides shared cart state so the navbar and shopping pages can react to cart changes without excessive prop drilling.
 
-Provides shared cart state to the application so the navbar and shopping pages can react to cart changes without passing cart data through many component levels.
+---
 
-8. API Integration
+## API Integration Matrix
 
-Authentication
+### Authentication
 
+```text
 POST /api/auth/register
 POST /api/auth/login
+```
 
-Catalog
+### Catalogue
 
+```text
 GET /api/category/allCategories
 GET /api/product/allProducts
 GET /api/product/{id}
 GET /api/product/search?name=...
 GET /api/product/category/{categoryName}
 GET /api/product/price?minPrice=...&maxPrice=...
+```
 
-Cart
+### Cart
 
+```text
 GET    /api/cart/all
 POST   /api/cart/add
 PUT    /api/cart/items/{productId}
 DELETE /api/cart/items/{productId}
 DELETE /api/cart
+```
 
-Addresses
+### Addresses
 
+```text
 GET    /api/addresses
 POST   /api/addresses
 PUT    /api/addresses/{addressId}
 DELETE /api/addresses/{addressId}
+```
 
-Orders
+### Orders
 
-POST /api/orders
-GET  /api/orders
-GET  /api/orders/{orderId}
-PUT  /api/orders/{orderId}/cancel
+```text
+POST   /api/orders
+GET    /api/orders
+GET    /api/orders/{orderId}
+PUT    /api/orders/{orderId}/cancel
+```
 
-Payments
+### Payments
 
+```text
 POST /api/payments
 GET  /api/payments/order/{orderId}
+```
 
 The payment UI represents the backend's simulated payment system. It does not process real money or communicate with a real payment provider.
 
-9. Product Images
+---
 
-The storefront uses src/components/productImage.js as a product-specific image resolver.
+## Product Image Handling
 
-The resolver maps the current product names to product-specific photographs instead of intentionally showing a generic category icon for every product.
+Product images are resolved through:
 
-For example:
-
-Logitech Wireless Mouse
-↓
-productImage.js
-↓
-Logitech mouse photograph
+```text
+src/components/productImage.js
+```
 
 The resolver supports:
 
-product-name mapping
-
-backend imageUrl fallback
-
-category placeholder fallback if an image cannot be loaded
-
-Product images use object-fit: contain so the full product photograph remains visible instead of being aggressively cropped.
+1. Product-name mapping
+2. Backend `imageUrl` fallback
+3. Category placeholder fallback
 
 The same resolver is used across product cards, product details and cart items.
 
-The current image mapping uses external image URLs. A future production-oriented enhancement would be to serve owned product assets from object storage/CDN or from the backend/static asset layer instead of relying on third-party hot-linked images.
+Images use `object-fit: contain` so the product remains visible without aggressive cropping.
 
-10. CORS
+The current mapping uses external image URLs. A production-oriented implementation could move owned product assets to object storage/CDN or a backend/static asset layer.
 
-The frontend communicates directly with the Spring Boot backend. There is no Vite /api proxy in the current configuration.
+---
 
-The backend must allow:
+## Storefront Screenshots
 
-Origin:
+### Home
+
+![ShopSphere Home](../docs/screenshots/home.png)
+
+### Product Catalogue
+
+![ShopSphere Product Catalogue](../docs/screenshots/product-catalog.png)
+
+### Shopping Cart
+
+![ShopSphere Cart](../docs/screenshots/cart.png)
+
+### Login
+
+![ShopSphere Login](../docs/screenshots/login.png)
+
+### Registration
+
+![ShopSphere Registration](../docs/screenshots/register.png)
+
+---
+
+## CORS & Backend Communication
+
+The frontend communicates directly with the Spring Boot backend. There is no Vite `/api` proxy in the current configuration.
+
+The backend allows the development origin:
+
+```text
 http://localhost:5173
+```
 
-Methods:
+and supports:
 
-GET
-POST
-PUT
-DELETE
-PATCH
-OPTIONS
+```text
+GET POST PUT DELETE PATCH OPTIONS
+```
 
-Headers:
+with headers including:
 
-Authorization
-Content-Type
+```text
+Authorization Content-Type
+```
 
-Credentials are enabled by the backend's global CORS configuration.
+CORS is handled by the backend's global configuration rather than individual React components.
 
-Therefore, individual React components do not need to implement CORS logic.
+---
 
-11. Error and Loading UX
+## Error, Loading & Empty States
 
-Reusable components are used for common UI states:
+Reusable components include:
 
+```text
 Loading.jsx
 EmptyState.jsx
 ErrorBoundary.jsx
+```
 
-The application distinguishes between:
+The UI distinguishes between:
 
-loading data
+- Loading data
+- Empty catalogue/cart/order states
+- API errors
+- Expired authentication
+- Unexpected React rendering errors
 
-empty catalogue/cart/order states
+`ErrorBoundary` provides a controlled recovery screen instead of allowing an unexpected component error to leave the application blank.
 
-API errors
+---
 
-expired authentication
+## Environment Configuration
 
-unexpected React rendering errors
+`.env.example` contains:
 
-ErrorBoundary provides a controlled recovery screen instead of allowing an unexpected component error to leave the application blank.
-
-12. Environment Configuration
-
-.env.example contains the public development configuration template:
-
+```env
 VITE_API_BASE_URL=http://localhost:8080
+```
 
-For local development, create .env only if you need to override the default API URL:
+Create `.env` only when you need to override the development API URL.
 
-VITE_API_BASE_URL=http://localhost:8080
+Do **not** place database credentials, JWT signing secrets or private API keys into Vite environment variables. `VITE_*` values are intended for client-side use and can become visible in the browser bundle.
 
-.env is ignored by Git.
+---
 
-Do not put passwords, database credentials or JWT signing secrets into the React application's Vite environment. Any VITE_* variable is intended for client-side use and can become visible in the browser bundle.
+## Typical User Flow
 
-13. Running the Frontend
-
-Requirements:
-
-Node.js
-
-npm
-
-Spring Boot backend running on http://localhost:8080
-
-Install dependencies:
-
-npm install
-
-Start development server:
-
-npm run dev
-
-Open:
-
-http://localhost:5173
-
-Production build:
-
-npm run build
-
-Preview production build:
-
-npm run preview
-
-14. Typical User Flow
-
+```text
 Register
-↓
+  ↓
 Login
-↓
+  ↓
 JWT stored in browser
-↓
+  ↓
 Browse products
-↓
+  ↓
 Search / filter
-↓
+  ↓
 View product details
-↓
+  ↓
 Add product to cart
-↓
+  ↓
 Manage quantity
-↓
-Select/create shipping address
-↓
+  ↓
+Select / create shipping address
+  ↓
 Place order
-↓
+  ↓
 Simulated payment
-↓
+  ↓
 Order confirmed
-↓
+  ↓
 View order history/details
+```
 
-15. Security Notes
+---
+
+## Security Model
 
 The frontend participates in the backend security model but does not replace backend authorization.
 
-For example, hiding an admin button in React would not be considered an authorization mechanism. The backend independently enforces the ADMIN role for protected admin operations.
+For example, hiding an admin button in React is not an authorization mechanism. The backend independently enforces the required role.
 
 The backend remains the source of truth for:
 
-authentication
+- Authentication
+- Authorization
+- Ownership checks
+- Product stock
+- Order status
+- Payment state
+- Validation
 
-authorization
+---
 
-ownership checks
-
-product stock
-
-order status
-
-payment state
-
-validation
-
-16. GitHub Safety
+## GitHub Safety
 
 Never commit:
 
+```text
 .env
 .env.*          # except .env.example
 node_modules/
@@ -469,105 +451,100 @@ private certificates/keys
 backend passwords
 JWT secrets
 API keys
+```
 
-The frontend .gitignore and repository-level .gitignore are configured to ignore local environment files and generated dependencies/build output.
+If a secret was exposed in Git history, `.gitignore` cannot remove the historical secret. Rotate/revoke it and clean the repository history before publishing.
 
-Also remember that .gitignore cannot remove a secret that has already been committed to Git history. If a secret was exposed, rotate/revoke it and clean the Git history before making the repository public.
+---
 
-17. Backend Dependency
+## Running the Frontend
 
-The frontend expects the companion Spring Boot application in:
+### Requirements
 
+- Node.js
+- npm
+- Spring Boot backend running on `http://localhost:8080`
+
+### Install Dependencies
+
+```bash
+npm install
+```
+
+### Start Development Server
+
+```bash
+npm run dev
+```
+
+Open:
+
+```text
+http://localhost:5173
+```
+
+### Production Build
+
+```bash
+npm run build
+```
+
+### Preview Production Build
+
+```bash
+npm run preview
+```
+
+---
+
+## Backend Dependency
+
+The frontend expects the companion backend in:
+
+```text
 ecommerce_Backend/
+```
 
-The backend README contains the detailed documentation for:
+The backend README documents JWT security, RBAC, CORS, validation, global exception handling, transactions, pessimistic locking, `@EntityGraph`, lazy loading, order lifecycle, simulated payments and PostgreSQL configuration.
 
-JWT security
+---
 
-RBAC
+## Current Scope vs Future Improvements
 
-CORS
+### Implemented
 
-validation
+- React storefront
+- REST API integration
+- JWT authentication flow
+- Protected routes
+- Product catalogue
+- Search/filtering
+- Cart
+- Address selection
+- Checkout
+- Orders
+- Simulated payment UI
+- Error/loading/empty states
+- Product-specific images
+- Responsive layout
 
-global exception handling
+### Future Enhancements
 
-transactions
+- Admin dashboard UI
+- Product image upload/management
+- TanStack Query or another persistent client-side cache/query library
+- Pagination/infinite scrolling
+- Wishlist
+- Coupon UI
+- Reviews/ratings
+- Better optimistic cart updates
+- Automated frontend tests
+- Accessibility audit and keyboard navigation improvements
+- Production image CDN/object storage
+- Secure cookie-based authentication where appropriate
 
-pessimistic locking
+---
 
-@EntityGraph
+## Portfolio Description
 
-lazy loading
-
-order lifecycle
-
-simulated payments
-
-PostgreSQL configuration
-
-GitHub secret protection
-
-18. Current Scope and Future Improvements
-
-Implemented
-
-React storefront
-
-REST API integration
-
-JWT authentication flow
-
-Protected routes
-
-Product catalogue
-
-Search/filtering
-
-Cart
-
-Address selection
-
-Checkout
-
-Orders
-
-Simulated payment UI
-
-Error/loading/empty states
-
-Product-specific images
-
-Responsive layout
-
-Future enhancements
-
-Admin dashboard UI
-
-Product image upload/management
-
-Persistent client-side cache/query library such as TanStack Query
-
-Pagination/infinite scrolling
-
-Wishlist
-
-Coupon UI
-
-Reviews/ratings
-
-Better optimistic cart updates
-
-Automated frontend tests
-
-Accessibility audit and keyboard-navigation improvements
-
-Production image CDN/object storage
-
-Secure cookie-based authentication where appropriate
-
-19. Portfolio Description
-
-A concise GitHub/project description:
-
-ShopSphere Frontend: Built a responsive React e-commerce storefront integrated with a Spring Boot REST API, implementing JWT-authenticated routes, Axios interceptors, product search/filtering, cart management, address-based checkout, order tracking, simulated payments, reusable UI state components and product-specific image handling.
+**ShopSphere Frontend:** Built a responsive React e-commerce storefront integrated with a Spring Boot REST API, implementing JWT-authenticated routes, Axios interceptors, product search/filtering, cart management, address-based checkout, order tracking, simulated payments, reusable UI state components and product-specific image handling.
